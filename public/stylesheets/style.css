@@ -1,0 +1,31 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#div_clock_body{
+	position: relative;
+	background-color: gray;
+	width:300px;
+	height:300px;
+}
+
+#canvas{
+	position: absolute;
+}
+#div_hourhand{
+	position: absolute;
+	background-color: red;
+}
+#div_minutehand{
+	position: absolute;
+	background-color: blue;
+}
+#div_secondhand{
+	position: absolute;
+	background-color: yellow;
+}
