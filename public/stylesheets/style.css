@@ -10,8 +10,8 @@ a {
 #div_clock_body{
 	position: relative;
 	background-color: gray;
-	width:300px;
-	height:300px;
+	width:500px;
+	height:500px;
 }
 
 #canvas{
@@ -28,4 +28,13 @@ a {
 #div_secondhand{
 	position: absolute;
 	background-color: yellow;
+}
+.eventItem{
+	position: absolute;
+	width:10px;
+	height: 10px;
+}
+.innerEventItem{
+	background-color: #adff2f;
+	margin-left: auto;
 }

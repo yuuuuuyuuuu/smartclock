@@ -1,8 +1,4 @@
 
-// Debug Flag
-var D = true;
-var D_TAG = "ClockControl: ";
-
 // Params
 var canvasId = "canvas";
 var hourHandId = "div_hourhand";
@@ -10,33 +6,104 @@ var minuteHandId = "div_minutehand";
 var secondHandId = "div_secondhand";
 
 var ClockView = Backbone.View.extend({
+
+	D: true,
+	D_TAG: "ClockView: ",
+
 	defaults:{
-		"model":null
+		"model": null,
+		"collection": null,
+		"clockAreaWidth": 0,
+		"clockAreaHeight": 0,
+		"clockRadius": 0
 	},
+	
+	hourHandElement: null,
+	minuteHandElement: null,
+	secondHandElement: null,
+
 	initialize:function(){
-		if(D) console.log(D_TAG + "initialize");
-		if(D) console.log(D_TAG + "el:" + this.el);
+		if(D) console.log(this.D_TAG + "initialize");
+		if(D) console.log(this.D_TAG + "el:" + this.el);
+
+		// Model event
 		this.model.bind("change", this.setTime, this);
 		this.model.bind("destroy", this.remove, this);
+
+		// Collection
+		this.collection.bind("add", this.onAddModelToCollection, this);
 
 		this.addClockParts();
 
 	},
+	onAddModelToCollection: function(model)
+	{
+		if(D) console.log(this.D_TAG + "onAddMobileToCollection");
+		if(D) console.log(this.D_TAG + "model:" + JSON.stringify(model));
+
+		this.addItem(model);
+	},
+	addItem: function(model)
+	{
+		if(D) console.log(this.D_TAG + "addItem");
+
+		var jqueryParentObj = this.$el;
+
+		var itemClassName = "eventItem";
+		var innerItemClassName = "innerEventItem";
+		var itemTag = "<div class=" + itemClassName + "><div class=" + innerItemClassName + "></div></div>";
+		
+		jqueryParentObj.append(itemTag);
+
+		// Style
+		var addedElement = jqueryParentObj.find("." + itemClassName + ":last");
+		if(D) console.log(this.D_TAG + "addedElement:" + addedElement.attr("class"));
+
+		var itemOffsetLength = 10;
+		var itemWidth = 10;
+		var itemHeight = this.clockRadius + itemOffsetLength;;
+		var itemLeftPx = (this.clockAreaWidth - itemOffsetLength )/2 + "px";
+		var itemTopPx = -itemOffsetLength;
+		var degreeToRotate = this.getHourHandDegree(model.get("hour"), model.get("minute"));
+		if(D) console.log(this.D_TAG + "ItemRotation:" + degreeToRotate);
+		addedElement.width(itemWidth).height(itemHeight);
+		addedElement.css({"left":itemLeftPx, "top":itemTopPx});
+		addedElement.css({"transform-origin":"bottom"});
+		this.rotateElement(addedElement, degreeToRotate);
+
+		var innerAddedElement = addedElement.find("." + innerItemClassName);
+		innerAddedElement.width(itemWidth).height(itemWidth);
+
+
+	},
+	calculateItemPosition: function(hour, minute)
+	{
+		if(D) console.log(this.D_TAG + "calculateItemPosition");
+
+		// Item display location should be re-considered
+		// Currently, just display it as same degree as hourhand rectangle
+		var degreeToDisplay = this.getHourHandDegree(hour, minute, 0);
+
+
+
+	},
 	addClockParts: function(bodyDiv)
 	{
-		if(D) console.log(D_TAG + "addCanvas");
+		if(D) console.log(this.D_TAG + "addCanvas");
 
-		var wrapperEleWidth = this.$el.width();
-		var wrapperEleHeight = this.$el.height();
-		var wrapperEleWidthPx = wrapperEleWidth + "px";
-		var wrapperEleHeightPx = wrapperEleHeight + "px";
+		this.clockAreaWidth = this.$el.width();
+		this.clockAreaHeight = this.$el.height();
+		this.clockRadius = this.clockAreaWidth / 2; // temp
 
-		if(D) console.log(D_TAG + "wrapper widht:" + wrapperEleWidth);
-		if(D) console.log(D_TAG + "wrapper height:" + wrapperEleHeight);
+		var wrapperEleWidthPx = this.clockAreaWidth + "px";
+		var wrapperEleHeightPx = this.clockAreaHeight + "px";
+
+		if(D) console.log(this.D_TAG + "wrapper widht:" + this.clockAreaWidth);
+		if(D) console.log(this.D_TAG + "wrapper height:" + this.clockAreaHeight);
 
 		// Parent div
-		var borderRadiusPx =  String(wrapperEleWidth/2) + "px";
-		if(D) console.log(D_TAG + borderRadiusPx);
+		var borderRadiusPx =  String(this.clockAreaWidth/2) + "px";
+		if(D) console.log(this.D_TAG + borderRadiusPx);
 		this.$el.css("border-radius", borderRadiusPx);
 
 		// background
@@ -49,62 +116,73 @@ var ClockView = Backbone.View.extend({
 		// hour hand
 		var hourHandTag = "<div id=" + '"' + hourHandId + '"></div>';
 		this.$el.append(hourHandTag);
-		var hourHandWidth = wrapperEleWidth/20;
-		var hourHandHeight = wrapperEleHeight/5;
-		var hourHandLeftPx = wrapperEleWidth/2 - hourHandWidth/2 + "px";
-		var hourHandTopPx = wrapperEleHeight/2 - hourHandHeight + "px";
-		this.$el.find("#" + hourHandId).css({"left":hourHandLeftPx, "top":hourHandTopPx});
-		this.$el.find("#" + hourHandId).width(hourHandWidth).height(hourHandHeight);
-		this.$el.find("#" + hourHandId).css({"transform-origin":"bottom"});
+		var hourHandWidth = this.clockAreaWidth/20;
+		var hourHandHeight = this.clockAreaHeight/5;
+		var hourHandLeftPx = this.clockAreaWidth/2 - hourHandWidth/2 + "px";
+		var hourHandTopPx = this.clockAreaHeight/2 - hourHandHeight + "px";
+		this.hourHandElement = this.$el.find("#" + hourHandId);
+		this.hourHandElement.css({"left":hourHandLeftPx, "top":hourHandTopPx});
+		this.hourHandElement.width(hourHandWidth).height(hourHandHeight);
+		this.hourHandElement.css({"transform-origin":"bottom"});
 
 		// minute hand
 		var minuteHandTag = "<div id=" + '"' + minuteHandId + '"></div>';
 		this.$el.append(minuteHandTag);
-		var minuteHandWidth = wrapperEleWidth/40;
-		var minuteHandHeight = wrapperEleHeight/3;
-		var minuteHandLeftPx = wrapperEleWidth/2 - minuteHandWidth/2 + "px";
-		var minuteHandTopPx = wrapperEleHeight/2 - minuteHandHeight + "px";
-		this.$el.find("#" + minuteHandId).css({"left":minuteHandLeftPx, "top":minuteHandTopPx});
-		this.$el.find("#" + minuteHandId).width(minuteHandWidth).height(minuteHandHeight);
-		this.$el.find("#" + minuteHandId).css({"transform-origin":"bottom"});
+		var minuteHandWidth = this.clockAreaWidth/40;
+		var minuteHandHeight = this.clockAreaHeight/3;
+		var minuteHandLeftPx = this.clockAreaWidth/2 - minuteHandWidth/2 + "px";
+		var minuteHandTopPx = this.clockAreaHeight/2 - minuteHandHeight + "px";
+		this.minuteHandElement = this.$el.find("#" + minuteHandId);
+		this.minuteHandElement.css({"left":minuteHandLeftPx, "top":minuteHandTopPx});
+		this.minuteHandElement.width(minuteHandWidth).height(minuteHandHeight);
+		this.minuteHandElement.css({"transform-origin":"bottom"});
 
 		// second hand
 		var secondHandTag = "<div id=" + '"' + secondHandId + '"></div>';
 		this.$el.append(secondHandTag);
-		var secondHandWidth = wrapperEleWidth/100;
-		var secondHandHeight = wrapperEleHeight/2.5;
-		var secondHandLeftPx = wrapperEleWidth/2 - secondHandWidth/2 + "px";
-		var secondHandTopPx = wrapperEleHeight/2 - secondHandHeight + "px";
-		this.$el.find("#" + secondHandId).css({"left":secondHandLeftPx, "top":secondHandTopPx});
-		this.$el.find("#" + secondHandId).width(secondHandWidth).height(secondHandHeight);
-		this.$el.find("#" + secondHandId).css({"transform-origin":"bottom"});
+		var secondHandWidth = this.clockAreaWidth/100;
+		var secondHandHeight = this.clockAreaHeight/2.5;
+		var secondHandLeftPx = this.clockAreaWidth/2 - secondHandWidth/2 + "px";
+		var secondHandTopPx = this.clockAreaHeight/2 - secondHandHeight + "px";
+		this.secondHandElement = this.$el.find("#" + secondHandId);
+		this.secondHandElement.css({"left":secondHandLeftPx, "top":secondHandTopPx});
+		this.secondHandElement.width(secondHandWidth).height(secondHandHeight);
+		this.secondHandElement.css({"transform-origin":"bottom"});
 
 	},
 	render:function(){
-		if(D) console.log(D_TAG + "render");
-		if(D) console.log(D_TAG + "Year:" + this.model.get("year"));
+		if(D) console.log(this.D_TAG + "render");
+		if(D) console.log(this.D_TAG + "Year:" + this.model.get("year"));
 		return this;
 	},
 	remove: function(){
-		if(D) console.log(D_TAG + "remove");
+		if(D) console.log(this.D_TAG + "remove");
 	},
 	setTime: function(model){
-		if(D) console.log(D_TAG + "setTime to:" + hour + ":" + minute + ":" + second);
+		if(D) console.log(this.D_TAG + "setTime to:" + hour + ":" + minute + ":" + second);
 
 		// test
 		var hour = model.get("hour");
 		var minute = model.get("minute");
 		var second = model.get("second");
-		if(D) console.log(D_TAG + "new time: " + hour + ":" + minute + ":" + second);
+		if(D) console.log(this.D_TAG + "new time: " + hour + ":" + minute + ":" + second);
 
 		var hourHandDegree = this.getHourHandDegree(hour, minute, second);
 		var minuteHandDegree = this.getMinuteHandDegree(hour, minute, second);
 		var secondHandDegree = this.getSecondHandDegree(hour, minute, second);
 
-		if(D) console.log(D_TAG + "Degree of " + hour + ":" + minute + ":" + second + ":" + hourHandDegree);
+		if(D) console.log(this.D_TAG + "Degree of " + hour + ":" + minute + ":" + second + ":" + hourHandDegree);
+		
+
+		this.rotateElement(this.hourHandElement, hourHandDegree);
+		this.rotateElement(this.minuteHandElement, minuteHandDegree);
+		this.rotateElement(this.secondHandElement, secondHandDegree);
+
+		/*
 		this.rotateHourHand(hourHandDegree);
 		this.rotateMinuteHand(minuteHandDegree);
 		this.rotateSecondHand(secondHandDegree);
+		*/
 
 	},
 	getHourHandDegree: function(hour, minute, second)
@@ -123,22 +201,11 @@ var ClockView = Backbone.View.extend({
 		var secondDegree = second * 6;
 		return secondDegree;
 	},
-	rotateHourHand: function(degree){
-		if(D) console.log(D_TAG + "rotateHourHand");
-		if(D) console.log(D_TAG + "rotate to:" + degree);
+	rotateElement: function(jqueryElement, degree){
+		if(D) console.log(this.D_TAG + "rotateElement");
+		if(D) console.log(this.D_TAG + "jqueryElement:" + jqueryElement);
+		if(D) console.log(this.D_TAG + "degree:" + degree);
 
-		this.$el.find("#" + hourHandId).css({"-webkit-transform": "rotate(" + degree + "deg)"});
-	},
-	rotateMinuteHand: function(degree){
-		if(D) console.log(D_TAG + "rotateMinuteHand");
-		if(D) console.log(D_TAG + "rotate to:" + degree);
-
-		this.$el.find("#" + minuteHandId).css({"-webkit-transform": "rotate(" + degree + "deg)"});
-	},
-	rotateSecondHand: function(degree){
-		if(D) console.log(D_TAG + "rotateSecondHand");
-		if(D) console.log(D_TAG + "rotate to:" + degree);
-
-		this.$el.find("#" + secondHandId).css({"-webkit-transform": "rotate(" + degree + "deg)"});
+		jqueryElement.css({"-webkit-transform": "rotate(" + degree + "deg)"});
 	}
 });

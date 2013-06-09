@@ -1,10 +1,15 @@
 
-// Debug Flag
-var D = true;
-var D_TAG = "AlarmCollection: ";
-
-var AlarmModel = Backbone.Model.extend({
+var EventCollection = Backbone.Collection.extend({
+	
+	D: true,
+	D_TAG: "EventCollection: ",
+	
 	defaults:{
+		model: EventModel
+	},
+	initialize: function()
+	{
+		if(D) console.log(this.D_TAG + "initialize");
 
 	}
 });
