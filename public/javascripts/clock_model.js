@@ -33,14 +33,12 @@ var ClockModel = Backbone.Model.extend({
 			success: function(data, status, xhr){
 				if(D) console.log(this.D_TAG + "ajax success");
 				if(D) console.log(this.D_TAG  + data.hour + ":" + data.minute + ":" + data.second);
-				self.set("hour", data.hour);
-				self.set("minute", data.minute);
-				self.set("second", data.second);
+				
+				if(self.hour != data.hour) self.set("hour", data.hour);
+				if(self.minute != data.minute) self.set("minute", data.minute);
+				if(self.second != data.second) self.set("second", data.second);
 			}
 		});
-
-		// set time
-
 	},
 	startSelfTimer: function(){
 		if(D) console.log(this.D_TAG + "startSelfTimer");
@@ -53,9 +51,17 @@ var ClockModel = Backbone.Model.extend({
 
 		self.set("second",self.get("second") + 1);
 		setTimeout(function(){
-			if(self.get("second")%60 == 0) self.updateTime();
+			if(self.get("second")%60 == 0) 
+			{
+				self.updateMinute();
+				//self.updateTime();
+			}
 			self.updateSecond(self);
 		}, 1000);
+	},
+	updateMinute: function()
+	{
+		this.updateTime();
 	}
 
 });

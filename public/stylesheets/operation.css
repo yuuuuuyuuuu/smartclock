@@ -1,0 +1,18 @@
+div, table, tr, td{
+	margin:0px;
+}
+
+.operationBody{
+	position: fixed;
+	right: 0px;
+	border-collapse: collapse;
+}
+
+.operationRectEle{
+	background-color: blue;
+}
+
+.operationCanvasEle{
+	margin-top: 3px;
+	background-color: green;
+}

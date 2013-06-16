@@ -11,5 +11,11 @@ var EventCollection = Backbone.Collection.extend({
 	{
 		if(D) console.log(this.D_TAG + "initialize");
 
+	},
+	getNextItem: function(year, month, day, hour, minute, second)
+	{
+		var nextEvent = null;
+
+		return nextEvent;
 	}
 });

@@ -27,23 +27,31 @@ var ClockView = Backbone.View.extend({
 		if(D) console.log(this.D_TAG + "el:" + this.el);
 
 		// Model event
-		this.model.bind("change", this.setTime, this);
+		this.model.bind("change:hour", this.setHour, this);
+		this.model.bind("change:minute", this.setMinute, this);
+		this.model.bind("change:second", this.setSecond, this);
 		this.model.bind("destroy", this.remove, this);
 
-		// Collection
-		this.collection.bind("add", this.onAddModelToCollection, this);
-
+		// time table data
+		if(D) console.log(this.D_TAG + "timeTableData");
+		if(D) console.log(this.options.timeTable);
+		
+		this.options.timeTable.bind("change", this.onTimeTableChanged, this);
 		this.addClockParts();
 
 	},
-	onAddModelToCollection: function(model)
+	onTimeTableChanged: function(model)
 	{
-		if(D) console.log(this.D_TAG + "onAddMobileToCollection");
-		if(D) console.log(this.D_TAG + "model:" + JSON.stringify(model));
+		if(D) console.log(this.D_TAG + "onTimeTalbeChanged");
+		var nextTrainTime = model.get("nextTrainTime");
 
-		this.addItem(model);
+
+		if(D) console.log(this.D_TAG + "nextTrainTime");
+		if(D) console.log(nextTrainTime);
+
+		this.addItem(nextTrainTime.hour, nextTrainTime.minute);
 	},
-	addItem: function(model)
+	addItem: function(hour, minute)
 	{
 		if(D) console.log(this.D_TAG + "addItem");
 
@@ -64,16 +72,18 @@ var ClockView = Backbone.View.extend({
 		var itemHeight = this.clockRadius + itemOffsetLength;;
 		var itemLeftPx = (this.clockAreaWidth - itemOffsetLength )/2 + "px";
 		var itemTopPx = -itemOffsetLength;
-		var degreeToRotate = this.getHourHandDegree(model.get("hour"), model.get("minute"));
+		// var degreeToRotate = this.getHourHandDegree(hour, minute);
+		var degreeToRotate = this.getMinuteHandDegree(hour, minute, 0);
 		if(D) console.log(this.D_TAG + "ItemRotation:" + degreeToRotate);
 		addedElement.width(itemWidth).height(itemHeight);
 		addedElement.css({"left":itemLeftPx, "top":itemTopPx});
 		addedElement.css({"transform-origin":"bottom"});
 		this.rotateElement(addedElement, degreeToRotate);
 
+		var borderRadiusPx =  itemWidth/2 + "px";
 		var innerAddedElement = addedElement.find("." + innerItemClassName);
 		innerAddedElement.width(itemWidth).height(itemWidth);
-
+		innerAddedElement.css("border-radius", borderRadiusPx);
 
 	},
 	calculateItemPosition: function(hour, minute)
@@ -158,31 +168,47 @@ var ClockView = Backbone.View.extend({
 	remove: function(){
 		if(D) console.log(this.D_TAG + "remove");
 	},
-	setTime: function(model){
-		if(D) console.log(this.D_TAG + "setTime to:" + hour + ":" + minute + ":" + second);
+	setHour: function(model){
 
-		// test
 		var hour = model.get("hour");
 		var minute = model.get("minute");
 		var second = model.get("second");
-		if(D) console.log(this.D_TAG + "new time: " + hour + ":" + minute + ":" + second);
+
+		if(D) console.log(this.D_TAG + "new hour: " + hour);
 
 		var hourHandDegree = this.getHourHandDegree(hour, minute, second);
+		this.rotateElement(this.hourHandElement, hourHandDegree);
+
+	},
+	setMinute: function(model){
+
+		var hour = model.get("hour");
+		var minute = model.get("minute");
+		var second = model.get("second");
+
+		if(D) console.log(this.D_TAG + "new minute: " + minute);
+
 		var minuteHandDegree = this.getMinuteHandDegree(hour, minute, second);
+		this.rotateElement(this.minuteHandElement, minuteHandDegree);
+
+	},
+	setSecond: function(model){
+
+		// New TIme
+		var hour = model.get("hour");
+		var minute = model.get("minute");
+		var second = model.get("second");
+
+		if(D) console.log(this.D_TAG + "new second: " + second);
+
 		var secondHandDegree = this.getSecondHandDegree(hour, minute, second);
 
-		if(D) console.log(this.D_TAG + "Degree of " + hour + ":" + minute + ":" + second + ":" + hourHandDegree);
-		
-
-		this.rotateElement(this.hourHandElement, hourHandDegree);
-		this.rotateElement(this.minuteHandElement, minuteHandDegree);
 		this.rotateElement(this.secondHandElement, secondHandDegree);
 
-		/*
-		this.rotateHourHand(hourHandDegree);
-		this.rotateMinuteHand(minuteHandDegree);
-		this.rotateSecondHand(secondHandDegree);
-		*/
+		// update next train time
+		var direcitionType = "toShonandai";
+		var dayType = "weekday";
+		this.options.timeTable.updateNextTrainTime(direcitionType, dayType, hour, minute);
 
 	},
 	getHourHandDegree: function(hour, minute, second)
