@@ -51,10 +51,20 @@ var ClockView = Backbone.View.extend({
 
 		this.addItem(nextTrainTime.hour, nextTrainTime.minute);
 	},
+	removeCurrentItem: function()
+	{
+		if(D) console.log(this.D_TAG + "removeCurrentItem");
+
+		var itemClassName = "eventItem";
+		$("." + itemClassName).remove();
+
+	},
 	addItem: function(hour, minute)
 	{
 		if(D) console.log(this.D_TAG + "addItem");
 
+		this.removeCurrentItem();
+		
 		var jqueryParentObj = this.$el;
 
 		var itemClassName = "eventItem";
