@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "express": "3.0.6",
-    "ejs": "*"
+    "ejs": "*",
+    "momemt": "2.0.0"
   }
 }
