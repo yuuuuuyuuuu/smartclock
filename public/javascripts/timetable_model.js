@@ -7,7 +7,8 @@ var TimetableModel = Backbone.Model.extend({
 		timeTable: null,
 		nextTrainTime: null
 	},
-	TIMETABLE_SERVER_URL: "http://localhost:3000/timetables",
+	/*TIMETABLE_SERVER_URL: "http://localhost:3000/timetables",*/
+	TIMETABLE_SERVER_URL: "http://smartclock.c.node-ninja.com:3000//timetables",
 	initialize:function(){
 		if(D) console.log(this.D_TAG + "Initialize");
 

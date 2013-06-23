@@ -2,7 +2,7 @@
 // Clock Server params
 // var CLOCK_SERVER_URL = "http://localhost:3000/current_time";
 // var CLOCK_SERVER_URL = "http://210.152.156.68:3000/current_time";
-var CLOCK_SERVER_URL = "http://http://smartclock.c.node-ninja.com:3000/current_time";
+var CLOCK_SERVER_URL = "http://smartclock.c.node-ninja.com:3000/current_time";
 
 
 var ClockModel = Backbone.Model.extend({
