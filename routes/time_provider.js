@@ -6,7 +6,7 @@
 exports.currentTime = function(req, res){
 
 	var moment = require('moment');
-	var hour = moment().hour();
+	var hour = moment().utc().hour() + 9;
 	var minute = moment().minute();
 	var second = moment().second();
 
