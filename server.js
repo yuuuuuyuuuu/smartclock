@@ -1,5 +1,11 @@
+var sys = require('sys');
 var http = require('http');
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello Node Ninja\n');
-}).listen(80);
+var server = http.createServer(
+function (request, response) {
+response.writeHead(200, {'Content-Type': 'text/plain'});
+response.write('Hello World!!\n');
+response.end();
+}
+).listen(3000);
+
+console.log("Listening on port 3000");
